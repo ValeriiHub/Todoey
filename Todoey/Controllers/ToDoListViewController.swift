@@ -12,14 +12,13 @@ import CoreData
 class ToDoListViewController: UITableViewController {
 
     var itemArray = [Item]()
-    let dataFilePith = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Item.plist")
         
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext // добираемся к свойству persistentContainer из AppDelegate и создаем context = persistentContainer.viewContext
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
-//        loadItems()
+        loadItems()
     }
     
     
@@ -96,18 +95,17 @@ class ToDoListViewController: UITableViewController {
         tableView.reloadData()
     }
     
-//    func loadItems() {
-//        if let data = try? Data(contentsOf: dataFilePith!) {        // извлекаем данные формата Data из plist по адресу dataFilePith
-//            let decoder = PropertyListDecoder()
-//
-//            do {
-//                itemArray = try decoder.decode([Item].self, from: data)    // декодирует полученные данные Data в модель
-//            } catch {
-//                print("Error decoding item array, \(error)")
-//            }
-//
-//        }
-//    }
+    func loadItems() {
+        let request: NSFetchRequest<Item> = Item.fetchRequest()    // создаем request по модели Item   ??
+
+            do {
+                itemArray = try context.fetch(request)             // извлекаем данные из context по request ??
+            } catch {
+                print("Error fetching data from context, \(error)")
+            }
+
+        
+    }
 }
 
 
