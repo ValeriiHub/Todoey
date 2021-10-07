@@ -7,22 +7,19 @@
 //
 
 import UIKit
+import CoreData
 
 class ToDoListViewController: UITableViewController {
 
     var itemArray = [Item]()
     let dataFilePith = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Item.plist")
-    
-//    let defaults = UserDefaults.standard   // создание cинглтона UserDefaults
+        
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext // добираемся к свойству persistentContainer из AppDelegate и создаем context = persistentContainer.viewContext
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-//        if let items = defaults.array(forKey: "ToDoListArray") as? [Item] {  // извлечение данных с помощью UserDefaults
-//            itemArray = items
-//        }
 
-        loadItems()
+//        loadItems()
     }
     
     
@@ -66,14 +63,15 @@ class ToDoListViewController: UITableViewController {
         let alert = UIAlertController(title: "Add New Todoey Item", message: "", preferredStyle: .alert)
         
         let action = UIAlertAction(title: "Add Item", style: .default) { action in
+
             
-            let newItem = Item()
+            let newItem = Item(context: self.context)  // создаем обьект Item: NSManagedObject (обьект CoreData)
+            
             newItem.title = textField.text!
+            newItem.done = false
             
             self.itemArray.append(newItem)
-            
-//            self.defaults.set(self.itemArray, forKey: "ToDoListArray")   // сохранение данных c помощью UserDefaults
-            
+                        
             self.saveItem()
         }
         
@@ -87,31 +85,29 @@ class ToDoListViewController: UITableViewController {
         present(alert, animated: true, completion: nil)
     }
     
-    func saveItem() {                                   // сохранение данных в plist
-        let encoder = PropertyListEncoder()
+    func saveItem() {
         
         do {
-            let data = try encoder.encode(itemArray)        // кодируем наши данные в Data и затем записываем их в plist по адресу dataFilePith
-            try data.write(to: dataFilePith!)
+            try context.save()  // сохраняем данные в CoreData
         } catch {
-            print("Error encoding item array, \(error)")
+            print("Error saving context, \(error)")
         }
         
         tableView.reloadData()
     }
     
-    func loadItems() {
-        if let data = try? Data(contentsOf: dataFilePith!) {        // извлекаем данные формата Data из plist по адресу dataFilePith
-            let decoder = PropertyListDecoder()
-            
-            do {
-                itemArray = try decoder.decode([Item].self, from: data)    // декодирует полученные данные Data в модель
-            } catch {
-                print("Error decoding item array, \(error)")
-            }
-            
-        }
-    }
+//    func loadItems() {
+//        if let data = try? Data(contentsOf: dataFilePith!) {        // извлекаем данные формата Data из plist по адресу dataFilePith
+//            let decoder = PropertyListDecoder()
+//
+//            do {
+//                itemArray = try decoder.decode([Item].self, from: data)    // декодирует полученные данные Data в модель
+//            } catch {
+//                print("Error decoding item array, \(error)")
+//            }
+//
+//        }
+//    }
 }
 
 
